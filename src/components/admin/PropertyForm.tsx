@@ -17,10 +17,10 @@ const PURPOSE_OPTIONS = [
 ] as const;
 
 const STATUS_OPTIONS: { value: PropertyStatus; label: string }[] = [
-  { value: "draft", label: "Draft" },
-  { value: "published", label: "Published" },
-  { value: "sold", label: "Sold" },
-  { value: "rented", label: "Rented" },
+  { value: "draft", label: "แบบร่าง" },
+  { value: "published", label: "เผยแพร่" },
+  { value: "sold", label: "ขายแล้ว" },
+  { value: "rented", label: "ปล่อยเช่าแล้ว" },
 ];
 
 function FieldError({ message }: { message?: string }) {
@@ -211,8 +211,8 @@ export function PropertyForm({ property }: { property?: Property }) {
       </div>
 
       {property && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-          ส่วนอัปโหลดรูปจะตามมาในรอบถัดไป ตอนนี้แก้ข้อความ รายละเอียด ราคา และสถานะของทรัพย์ได้ก่อน
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+          ตอนนี้คุณแก้ข้อความ รายละเอียด ราคา สถานะ และอัปโหลดรูปของทรัพย์นี้ได้แล้ว หากต้องการปิดการขายให้เปลี่ยนสถานะเป็น “ขายแล้ว” ได้เลย
         </div>
       )}
     </form>

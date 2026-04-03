@@ -62,10 +62,35 @@ export async function getPublishedPropertiesServer(params: {
 export async function getPropertyBySlugServer(slug: string): Promise<Property | undefined> {
   try {
     const { data, error } = await getPropertyBySlugQuery(slug);
-    if (error || !data) return getMockPropertyBySlug(slug);
+    if (error || !data) {
+      const mock = getMockPropertyBySlug(slug);
+      if (mock) return mock;
+
+      const direct = await getPropertyBySlugAnyStatusServer(slug);
+      return direct;
+    }
     return mapProperty(data);
   } catch {
-    return getMockPropertyBySlug(slug);
+    const mock = getMockPropertyBySlug(slug);
+    if (mock) return mock;
+    return getPropertyBySlugAnyStatusServer(slug);
+  }
+}
+
+async function getPropertyBySlugAnyStatusServer(slug: string): Promise<Property | undefined> {
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*, property_images(*)")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error || !data) return undefined;
+    return mapProperty(data);
+  } catch {
+    return undefined;
   }
 }
 

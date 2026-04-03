@@ -6,10 +6,10 @@ export const metadata = {
 };
 
 const ADMIN_LINKS = [
-  { title: "Property Management", href: "/admin/properties", description: "เพิ่ม แก้ไข และจัดการรายการทรัพย์" },
-  { title: "Inquiries", href: "/admin/inquiries", description: "ดูรายการสอบถามและคำขอฝากขายที่ส่งเข้ามา" },
-  { title: "Articles", href: "/admin/articles", description: "จัดการบทความและคอนเทนต์เว็บไซต์" },
-  { title: "FAQs", href: "/admin/faqs", description: "แก้ไขคำถามที่พบบ่อยและข้อมูลช่วยตัดสินใจ" },
+  { title: "จัดการทรัพย์", href: "/admin/properties", description: "เพิ่ม แก้ไข อัปโหลดรูป และเปลี่ยนสถานะรายการทรัพย์" },
+  { title: "รายการสอบถาม", href: "/admin/inquiries", description: "ดูรายการสอบถามและคำขอฝากขายที่ส่งเข้ามา" },
+  { title: "บทความ", href: "/admin/articles", description: "จัดการบทความและคอนเทนต์เว็บไซต์" },
+  { title: "คำถามพบบ่อย", href: "/admin/faqs", description: "แก้ไขคำถามที่พบบ่อยและข้อมูลช่วยตัดสินใจ" },
 ];
 
 export default function AdminPage() {
@@ -20,8 +20,7 @@ export default function AdminPage() {
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-black/45">Admin</p>
           <h1 className="mt-3 text-3xl font-semibold text-black md:text-4xl">homiqhome admin</h1>
           <p className="mt-4 text-base leading-relaxed text-black/70 md:text-lg">
-            โครงหลังบ้านสำหรับจัดการทรัพย์ รายการสอบถาม บทความ และ FAQ ตอนนี้ property CRUD และ image upload เริ่มมีแล้ว
-            ส่วน auth, bucket setup และสิทธิ์ admin จริงยังต้องปิดงานให้ครบก่อนใช้งานกับทีมงานเต็มตัว
+            หลังบ้านสำหรับจัดการทรัพย์ รายการสอบถาม บทความ และคำถามพบบ่อย ตอนนี้ระบบลงทรัพย์ แก้ไขข้อมูล อัปโหลดรูป และจัดการสถานะเริ่มพร้อมใช้งานจริงแล้ว
           </p>
         </div>
       </section>

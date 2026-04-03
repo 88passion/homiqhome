@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { updatePropertyStatusAction } from "@/app/admin/properties/actions";
 import { getAdminProperties } from "@/lib/admin/properties";
 import { PROPERTY_TYPE_LABELS } from "@/types/property";
 
@@ -17,6 +18,13 @@ const STATUS_STYLES = {
   published: "bg-emerald-100 text-emerald-700",
   sold: "bg-rose-100 text-rose-700",
   rented: "bg-sky-100 text-sky-700",
+} as const;
+
+const STATUS_LABELS = {
+  draft: "แบบร่าง",
+  published: "เผยแพร่",
+  sold: "ขายแล้ว",
+  rented: "ปล่อยเช่าแล้ว",
 } as const;
 
 export default async function AdminPropertiesPage({
@@ -38,9 +46,9 @@ export default async function AdminPropertiesPage({
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-black/45">Admin</p>
-            <h1 className="mt-2 text-3xl font-semibold text-black">Property Management</h1>
+            <h1 className="mt-2 text-3xl font-semibold text-black">จัดการทรัพย์</h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-black/70 md:text-base">
-              เพิ่ม แก้ไข และดูรายการทรัพย์ทั้งหมดจากหลังบ้าน ใช้หน้านี้เป็นจุดเริ่มต้นของการลงทรัพย์จริง
+              เพิ่ม แก้ไข และดูรายการทรัพย์ทั้งหมดจากหลังบ้าน พร้อมเปลี่ยนสถานะเร็วจากหน้านี้ได้เลย
             </p>
           </div>
 
@@ -60,7 +68,7 @@ export default async function AdminPropertiesPage({
 
         <div className="mt-8 overflow-hidden rounded-3xl border border-black/8 bg-white shadow-sm">
           <div className="border-b border-black/5 bg-black/[0.02] px-5 py-4 text-sm text-black/60">
-            ถ้ายังไม่เห็นรายการทรัพย์ แปลว่า environment ปัจจุบันยังไม่มีตารางหรือข้อมูลใน Supabase ชุดนี้ แต่ฟอร์มสร้างทรัพย์สามารถต่อยอดได้แล้ว
+            admin เห็นทุกทรัพย์ ส่วนหน้าเว็บ public จะแสดงตามสถานะและเงื่อนไขที่กำหนดไว้ เช่น เผยแพร่แล้วหรืออยู่ในรายการล่าสุด
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-black/5">
@@ -94,8 +102,25 @@ export default async function AdminPropertiesPage({
                     <td className="px-5 py-4 font-medium">{property.price.toLocaleString("th-TH")} บาท</td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLES[property.status ?? "draft"]}`}>
-                        {property.status ?? "draft"}
+                        {STATUS_LABELS[property.status ?? "draft"]}
                       </span>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <form action={updatePropertyStatusAction.bind(null, property.id, "published")}>
+                          <button type="submit" className="rounded-lg border border-emerald-200 px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-600 hover:text-white">
+                            เผยแพร่
+                          </button>
+                        </form>
+                        <form action={updatePropertyStatusAction.bind(null, property.id, "sold")}>
+                          <button type="submit" className="rounded-lg border border-rose-200 px-2.5 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-600 hover:text-white">
+                            ขายแล้ว
+                          </button>
+                        </form>
+                        <form action={updatePropertyStatusAction.bind(null, property.id, "draft")}>
+                          <button type="submit" className="rounded-lg border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-800 hover:text-white">
+                            แบบร่าง
+                          </button>
+                        </form>
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex justify-end gap-3">

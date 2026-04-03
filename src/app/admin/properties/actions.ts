@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createAdminProperty, updateAdminProperty, type PropertyAdminInput } from "@/lib/admin/properties";
 import type { PropertyStatus, PropertyType } from "@/types/property";
 
@@ -141,4 +142,25 @@ export async function updatePropertyAction(
   }
 
   redirect("/admin/properties?updated=1");
+}
+
+export async function updatePropertyStatusAction(propertyId: string, status: PropertyStatus) {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .update({ status })
+    .eq("id", propertyId)
+    .select("slug")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/admin/properties");
+  revalidatePath(`/admin/properties/${propertyId}`);
+  revalidatePath("/");
+  revalidatePath("/buy");
+  revalidatePath("/rent");
+  revalidatePath(`/properties/${data.slug}`);
 }

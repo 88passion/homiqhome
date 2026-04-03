@@ -26,7 +26,7 @@ export function getAdminReadinessReport(): AdminReadinessReport {
 
   warnings.push("ระบบ login/admin guard และ session ผ่าน Next.js cookies ถูกต่อแล้ว แต่ตอนนี้ยังต้องปิดงาน role access ของ admin_users ให้ผ่านจริง");
   warnings.push("ต้องสร้าง Supabase Storage bucket ชื่อ property-images ก่อน จึงจะอัปโหลดรูปใน production ได้จริง");
-  warnings.push("เมื่อ auth ผ่านแล้ว ควรถอด debug auth panel ออกก่อนใช้งานจริงกับทีมงาน");
+  warnings.push("ควรทดสอบ flow เพิ่มทรัพย์ แก้ไขทรัพย์ และอัปโหลดรูปบน production ให้ครบก่อนให้ทีมงานใช้จริง");
 
   return {
     hasSupabaseUrl,
