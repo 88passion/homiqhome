@@ -20,8 +20,8 @@ export default function AdminPage() {
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-black/45">Admin</p>
           <h1 className="mt-3 text-3xl font-semibold text-black md:text-4xl">homiqhome admin</h1>
           <p className="mt-4 text-base leading-relaxed text-black/70 md:text-lg">
-            โครงหลังบ้านเบื้องต้นสำหรับจัดการทรัพย์ รายการสอบถาม บทความ และ FAQ
-            รอบถัดไปจะต่อ auth และ data CRUD ให้ใช้งานจริงมากขึ้น
+            โครงหลังบ้านสำหรับจัดการทรัพย์ รายการสอบถาม บทความ และ FAQ ตอนนี้ property CRUD และ image upload เริ่มมีแล้ว
+            ส่วน auth, bucket setup และสิทธิ์ admin จริงยังต้องปิดงานให้ครบก่อนใช้งานกับทีมงานเต็มตัว
           </p>
         </div>
       </section>

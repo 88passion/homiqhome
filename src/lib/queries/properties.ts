@@ -4,7 +4,7 @@ import type { Database } from "@/types/database";
 type PropertyType = Database["public"]["Tables"]["properties"]["Row"]["property_type"];
 
 export async function getLatestProperties(limit = 4) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   return supabase
     .from("properties")
     .select("*, property_images(*)")
@@ -29,7 +29,7 @@ export async function getPublishedProperties({
   bedrooms?: number;
   maxPrice?: number;
 }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   let query = supabase
     .from("properties")
     .select("*, property_images(*)")
@@ -47,7 +47,7 @@ export async function getPublishedProperties({
 }
 
 export async function getPropertyBySlug(slug: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   return supabase
     .from("properties")
     .select("*, property_images(*)")
@@ -67,7 +67,7 @@ export async function getRelatedProperties({
   province: string;
   limit?: number;
 }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   return supabase
     .from("properties")
     .select("*, property_images(*)")

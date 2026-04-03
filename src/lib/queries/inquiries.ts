@@ -12,7 +12,7 @@ export async function createInquiry(payload: {
   message: string;
   payload?: Json;
 }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const insertPayload: Database["public"]["Tables"]["inquiries"]["Insert"] = payload;
   return supabase.from("inquiries").insert(insertPayload).select("id").single();
 }

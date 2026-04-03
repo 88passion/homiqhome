@@ -1,7 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 
 export async function getPublishedArticles() {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   return supabase
     .from("articles")
     .select("*")
@@ -10,7 +10,7 @@ export async function getPublishedArticles() {
 }
 
 export async function getPublishedArticleBySlug(slug: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   return supabase
     .from("articles")
     .select("*")
@@ -20,7 +20,7 @@ export async function getPublishedArticleBySlug(slug: string) {
 }
 
 export async function getPublishedFaqs() {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   return supabase
     .from("faqs")
     .select("*")
