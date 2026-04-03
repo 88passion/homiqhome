@@ -21,6 +21,9 @@ export function AuthDebugPanel({ title = "Auth debug", debug }: AuthDebugPanelPr
         <div><strong>adminRowFound:</strong> {String(debug.adminRowFound)}</div>
         <div><strong>adminRole:</strong> {debug.adminRole || "-"}</div>
         <div><strong>adminLookupError:</strong> {debug.adminLookupError || "-"}</div>
+        <div className="pt-2 text-sky-900/80">
+          ถ้า hasUser = true แต่ adminRowFound = false ทั้งที่คุณมั่นใจว่า row มีอยู่แล้ว ปัญหามักอยู่ที่ RLS/policy ของตาราง admin_users หรือเว็บกำลังชี้คนละ Supabase project
+        </div>
       </div>
     </section>
   );

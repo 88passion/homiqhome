@@ -1,6 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
 
 export interface AdminSessionInfo {
@@ -35,7 +36,8 @@ export async function getAdminAuthDebugInfo(): Promise<AdminAuthDebugInfo> {
     };
   }
 
-  const { data: adminUser, error } = await supabase
+  const adminClient = createAdminClient();
+  const { data: adminUser, error } = await adminClient
     .from("admin_users")
     .select("user_id, role")
     .eq("user_id", user.id)

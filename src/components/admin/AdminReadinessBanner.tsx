@@ -22,8 +22,8 @@ export function AdminReadinessBanner() {
             <span className={`rounded-full px-3 py-1 font-medium ${report.hasServiceRoleKey ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
               SERVICE ROLE {report.hasServiceRoleKey ? "พร้อม" : "ยังขาด"}
             </span>
-            <span className="rounded-full bg-zinc-100 px-3 py-1 font-medium text-zinc-700">
-              AUTH {report.authConfigured ? "พร้อม" : "ยังไม่เปิด"}
+            <span className={`rounded-full px-3 py-1 font-medium ${report.authConfigured ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-700"}`}>
+              AUTH {report.authConfigured ? "เชื่อมแล้ว" : "ยังไม่เปิด"}
             </span>
             <span className="rounded-full bg-zinc-100 px-3 py-1 font-medium text-zinc-700">
               BUCKET {report.bucketConfigured ? "พร้อม" : "ต้องสร้าง property-images"}

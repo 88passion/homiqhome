@@ -24,15 +24,15 @@ export function getAdminReadinessReport(): AdminReadinessReport {
     warnings.push("ยังไม่ได้ตั้งค่า SUPABASE_SERVICE_ROLE_KEY ทำให้ create/update/upload ฝั่ง admin จะทำงานไม่ครบ");
   }
 
-  warnings.push("ระบบ login/admin guard จริงยังไม่ถูกเปิดใช้ เพราะโปรเจกต์ยังไม่ได้ต่อ Supabase Auth session ผ่าน Next.js cookies");
+  warnings.push("ระบบ login/admin guard และ session ผ่าน Next.js cookies ถูกต่อแล้ว แต่ตอนนี้ยังต้องปิดงาน role access ของ admin_users ให้ผ่านจริง");
   warnings.push("ต้องสร้าง Supabase Storage bucket ชื่อ property-images ก่อน จึงจะอัปโหลดรูปใน production ได้จริง");
-  warnings.push("ควรเพิ่ม user ที่ได้รับสิทธิ์ลงในตาราง admin_users ก่อนเปิดใช้หลังบ้านกับทีมงาน");
+  warnings.push("เมื่อ auth ผ่านแล้ว ควรถอด debug auth panel ออกก่อนใช้งานจริงกับทีมงาน");
 
   return {
     hasSupabaseUrl,
     hasPublishableKey,
     hasServiceRoleKey,
-    authConfigured: false,
+    authConfigured: hasSupabaseUrl && hasPublishableKey,
     bucketConfigured: false,
     warnings,
   };
