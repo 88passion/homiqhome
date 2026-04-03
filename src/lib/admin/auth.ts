@@ -35,7 +35,7 @@ export async function getAdminSession(): Promise<AdminSessionInfo | null> {
 export async function requireAdminSession(): Promise<AdminSessionInfo> {
   const session = await getAdminSession();
   if (!session) {
-    redirect("/admin/login");
+    redirect("/login");
   }
   return session;
 }

@@ -7,7 +7,7 @@ export const metadata = {
   description: "เข้าสู่ระบบหลังบ้าน homiqhome",
 };
 
-export default async function AdminLoginPage() {
+export default async function LoginPage() {
   const session = await getAdminSession();
 
   if (session) {

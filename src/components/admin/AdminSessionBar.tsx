@@ -1,4 +1,4 @@
-import { logoutAction } from "@/app/admin/login/actions";
+import { logoutAction } from "@/app/login/actions";
 import type { AdminSessionInfo } from "@/lib/admin/auth";
 
 export function AdminSessionBar({ session }: { session: AdminSessionInfo }) {
