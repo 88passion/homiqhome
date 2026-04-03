@@ -9,6 +9,7 @@ export interface PropertyImageActionState {
 }
 
 const DEFAULT_STATE: PropertyImageActionState = { success: false };
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 function getString(formData: FormData, key: string) {
   return formData.get(key)?.toString().trim() ?? "";
@@ -26,6 +27,10 @@ export async function uploadPropertyImageAction(
 
   if (!(file instanceof File) || file.size === 0) {
     return { success: false, message: "กรุณาเลือกรูปที่ต้องการอัปโหลด" };
+  }
+
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { success: false, message: "ไฟล์ยังใหญ่เกินไปสำหรับการอัปโหลด กรุณาลดขนาดให้ไม่เกิน 4 MB" };
   }
 
   try {
