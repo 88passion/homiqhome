@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import { AuthDebugPanel } from "@/components/admin/AuthDebugPanel";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
-import { getAdminSession } from "@/lib/admin/auth";
+import { getAdminAuthDebugInfo, getAdminSession } from "@/lib/admin/auth";
 
 export const metadata = {
   title: "Admin Login | homiqhome",
@@ -9,6 +10,7 @@ export const metadata = {
 
 export default async function LoginPage() {
   const session = await getAdminSession();
+  const debug = await getAdminAuthDebugInfo();
 
   if (session) {
     redirect("/admin");
@@ -26,6 +28,7 @@ export default async function LoginPage() {
         </div>
 
         <AdminLoginForm />
+        <AuthDebugPanel title="Login page auth debug" debug={debug} />
       </div>
     </main>
   );
