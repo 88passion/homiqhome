@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAdminProperty, getSuggestedPropertyIdentity, updateAdminProperty, type PropertyAdminInput } from "@/lib/admin/properties";
-import { normalizePropertySlug, slugifyPropertyTitle } from "@/lib/properties/identity";
+import { normalizePropertySlug, slugifyPropertyTitle } from "@/lib/properties/identity.shared";
 import type { PropertyStatus, PropertyType } from "@/types/property";
 
 export interface PropertyFormState {

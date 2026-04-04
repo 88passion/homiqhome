@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { createPropertyAction, suggestPropertyIdentityAction, type PropertyFormState, updatePropertyAction } from "@/app/admin/properties/actions";
-import { normalizePropertySlug, slugifyPropertyTitle } from "@/lib/properties/identity";
+import { normalizePropertySlug, slugifyPropertyTitle } from "@/lib/properties/identity.shared";
 import type { Property, PropertyStatus, PropertyType } from "@/types/property";
 
 const PROPERTY_TYPE_OPTIONS: { value: PropertyType; label: string }[] = [
