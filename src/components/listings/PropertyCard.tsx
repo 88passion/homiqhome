@@ -11,7 +11,7 @@ interface PropertyCardProps {
 export function PropertyCard({ property }: PropertyCardProps) {
   const areaText = formatArea(property.landAreaSqw, property.usableAreaSqm);
   const isUnavailable = property.status === "sold" || property.status === "rented";
-  const statusLabel = property.status === "sold" ? "ขายแล้ว" : property.status === "rented" ? "ปล่อยเช่าแล้ว" : null;
+  const statusLabel = property.status === "sold" ? "SOLD OUT" : property.status === "rented" ? "RENTED" : null;
 
   return (
     <Link
@@ -33,9 +33,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
           {PROPERTY_TYPE_LABELS[property.propertyType]}
         </span>
         {statusLabel && (
-          <span className="absolute bottom-3 left-3 rounded bg-red-600/90 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-            {statusLabel}
-          </span>
+          <div className="absolute inset-x-3 bottom-3">
+            <span className="inline-flex w-full items-center justify-center rounded-xl bg-red-600/95 px-4 py-2 text-sm font-extrabold tracking-[0.18em] text-white shadow-lg backdrop-blur-sm md:text-base">
+              {statusLabel}
+            </span>
+          </div>
         )}
       </div>
       <div className="flex flex-1 flex-col p-5">
