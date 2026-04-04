@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { createPropertyAction, type PropertyFormState, updatePropertyAction } from "@/app/admin/properties/actions";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { createPropertyAction, suggestPropertyIdentityAction, type PropertyFormState, updatePropertyAction } from "@/app/admin/properties/actions";
+import { normalizePropertySlug, slugifyPropertyTitle } from "@/lib/properties/identity";
 import type { Property, PropertyStatus, PropertyType } from "@/types/property";
 
 const PROPERTY_TYPE_OPTIONS: { value: PropertyType; label: string }[] = [
@@ -148,14 +149,94 @@ export function PropertyForm({ property }: { property?: Property }) {
   const isEditing = Boolean(property);
   const action = isEditing ? updatePropertyAction.bind(null, property!.id) : createPropertyAction;
   const [state, formAction] = useActionState(action, INITIAL_STATE);
+  const [titleValue, setTitleValue] = useState(property?.title ?? "");
+  const [codeValue, setCodeValue] = useState(property?.code ?? "");
+  const [slugValue, setSlugValue] = useState(property?.slug ?? "");
+  const [isGeneratingIdentity, setIsGeneratingIdentity] = useState(false);
+  const slugTouchedRef = useRef(Boolean(property?.slug));
+  const titleSlugPreview = useMemo(() => normalizePropertySlug(slugifyPropertyTitle(titleValue)), [titleValue]);
+
+  useEffect(() => {
+    if (isEditing) return;
+
+    let active = true;
+    setIsGeneratingIdentity(true);
+
+    suggestPropertyIdentityAction(titleValue)
+      .then((identity) => {
+        if (!active) return;
+        setCodeValue(identity.code);
+        if (!slugTouchedRef.current) {
+          setSlugValue(identity.slug || titleSlugPreview);
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        if (!slugTouchedRef.current) {
+          setSlugValue(titleSlugPreview);
+        }
+      })
+      .finally(() => {
+        if (active) setIsGeneratingIdentity(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isEditing, titleSlugPreview, titleValue]);
+
+  useEffect(() => {
+    if (isEditing || slugTouchedRef.current) return;
+    setSlugValue(titleSlugPreview);
+  }, [isEditing, titleSlugPreview]);
 
   return (
     <form action={formAction} className="space-y-8">
       <div className="rounded-2xl border border-black/8 bg-white p-6 shadow-sm">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <InputGroup label="รหัสทรัพย์" name="code" defaultValue={property?.code} required error={state.errors?.code} />
-          <InputGroup label="Slug" name="slug" defaultValue={property?.slug} required error={state.errors?.slug} />
-          <InputGroup label="ชื่อทรัพย์" name="title" defaultValue={property?.title} required error={state.errors?.title} />
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-black">รหัสทรัพย์</span>
+            <input
+              name="code"
+              value={codeValue}
+              readOnly={!isEditing}
+              required={isEditing}
+              onChange={(event) => setCodeValue(event.target.value)}
+              className={`w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-black outline-none transition focus:border-black/30 ${!isEditing ? "cursor-not-allowed bg-black/[0.03] text-black/60" : ""}`}
+            />
+            {!isEditing && (
+              <p className="mt-1 text-xs text-black/50">ระบบจะสร้างรหัส HM ให้ใหม่อัตโนมัติ{isGeneratingIdentity ? "…" : ""}</p>
+            )}
+            <FieldError message={state.errors?.code} />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-black">Slug</span>
+            <input
+              name="slug"
+              value={slugValue}
+              required={isEditing}
+              onChange={(event) => {
+                slugTouchedRef.current = true;
+                setSlugValue(normalizePropertySlug(event.target.value));
+              }}
+              className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-black outline-none transition focus:border-black/30"
+            />
+            {!isEditing && (
+              <p className="mt-1 text-xs text-black/50">ระบบจะสร้าง slug จากชื่อทรัพย์ให้อัตโนมัติ และกัน slug ซ้ำให้</p>
+            )}
+            <FieldError message={state.errors?.slug} />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-black">ชื่อทรัพย์</span>
+            <input
+              name="title"
+              required
+              value={titleValue}
+              onChange={(event) => setTitleValue(event.target.value)}
+              className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-black outline-none transition focus:border-black/30"
+            />
+            <FieldError message={state.errors?.title} />
+          </label>
           <SelectGroup label="จุดประสงค์" name="purpose" defaultValue={property?.purpose ?? "buy"} options={[...PURPOSE_OPTIONS]} />
           <SelectGroup label="ประเภททรัพย์" name="propertyType" defaultValue={property?.propertyType ?? "house"} options={PROPERTY_TYPE_OPTIONS} />
           <SelectGroup label="สถานะ" name="status" defaultValue={property?.status ?? "draft"} options={STATUS_OPTIONS} />

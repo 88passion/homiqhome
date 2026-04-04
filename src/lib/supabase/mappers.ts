@@ -45,5 +45,6 @@ export function mapProperty(row: PropertyWithImages): Property {
     images: (row.property_images ?? []).sort((a, b) => a.sort_order - b.sort_order).map(mapPropertyImage),
     isFeatured: row.is_featured,
     isLatest: row.is_latest,
+    status: row.status,
   };
 }

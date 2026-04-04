@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createAdminProperty, updateAdminProperty, type PropertyAdminInput } from "@/lib/admin/properties";
+import { createAdminProperty, getSuggestedPropertyIdentity, updateAdminProperty, type PropertyAdminInput } from "@/lib/admin/properties";
+import { normalizePropertySlug, slugifyPropertyTitle } from "@/lib/properties/identity";
 import type { PropertyStatus, PropertyType } from "@/types/property";
 
 export interface PropertyFormState {
@@ -41,11 +42,11 @@ function parseHighlights(raw: string) {
     .filter(Boolean);
 }
 
-function validateInput(input: PropertyAdminInput) {
+function validateInput(input: PropertyAdminInput, options?: { isEditing?: boolean }) {
   const errors: Record<string, string> = {};
 
-  if (!input.code) errors.code = "กรุณากรอกรหัสทรัพย์";
-  if (!input.slug) errors.slug = "กรุณากรอก slug";
+  if (options?.isEditing && !input.code) errors.code = "กรุณากรอกรหัสทรัพย์";
+  if (options?.isEditing && !input.slug) errors.slug = "กรุณากรอก slug";
   if (!input.title) errors.title = "กรุณากรอกชื่อทรัพย์";
   if (!input.province) errors.province = "กรุณากรอกจังหวัด";
   if (!input.district) errors.district = "กรุณากรอกเขต / อำเภอ";
@@ -59,10 +60,13 @@ function validateInput(input: PropertyAdminInput) {
 }
 
 function buildInput(formData: FormData): PropertyAdminInput {
+  const title = getString(formData, "title");
+  const rawSlug = getString(formData, "slug");
+
   return {
     code: getString(formData, "code"),
-    slug: getString(formData, "slug"),
-    title: getString(formData, "title"),
+    slug: normalizePropertySlug(rawSlug || slugifyPropertyTitle(title)),
+    title,
     purpose: getString(formData, "purpose") as "buy" | "rent",
     propertyType: getString(formData, "propertyType") as PropertyType,
     province: getString(formData, "province"),
@@ -121,7 +125,7 @@ export async function updatePropertyAction(
   formData: FormData
 ): Promise<PropertyFormState> {
   const input = buildInput(formData);
-  const errors = validateInput(input);
+  const errors = validateInput(input, { isEditing: true });
 
   if (Object.keys(errors).length > 0) {
     return { success: false, errors, message: "กรุณาตรวจสอบข้อมูลอีกครั้ง" };
@@ -142,6 +146,10 @@ export async function updatePropertyAction(
   }
 
   redirect("/admin/properties?updated=1");
+}
+
+export async function suggestPropertyIdentityAction(title: string) {
+  return getSuggestedPropertyIdentity(title);
 }
 
 export async function updatePropertyStatusAction(propertyId: string, status: PropertyStatus) {

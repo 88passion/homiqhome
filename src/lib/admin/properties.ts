@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { slugifyPropertyTitle, formatHmCode, normalizePropertySlug } from "@/lib/properties/identity";
 import { mapProperty } from "@/lib/supabase/mappers";
 import type { Database } from "@/types/database";
 import type { Property, PropertyStatus, PropertyType } from "@/types/property";
@@ -54,7 +55,7 @@ const PROPERTY_SELECT = `
 function mapAdminInputToInsert(input: PropertyAdminInput): Database["public"]["Tables"]["properties"]["Insert"] {
   return {
     code: input.code,
-    slug: input.slug,
+    slug: normalizePropertySlug(input.slug),
     title: input.title,
     purpose: input.purpose,
     property_type: input.propertyType,
@@ -99,6 +100,12 @@ export async function getAdminProperties(): Promise<Property[]> {
   }
 }
 
+export async function getSuggestedPropertyIdentity(title?: string | null): Promise<{ code: string; slug: string }> {
+  const code = await getNextPropertyCode();
+  const slug = title ? await ensureUniqueSlug(slugifyPropertyTitle(title)) : "";
+  return { code, slug };
+}
+
 export async function getAdminPropertyById(id: string): Promise<Property | null> {
   try {
     const supabase = createAdminClient();
@@ -118,11 +125,66 @@ export async function getAdminPropertyById(id: string): Promise<Property | null>
   }
 }
 
+async function getNextPropertyCode(): Promise<string> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.from("properties").select("code");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const nextSequence = (data ?? []).reduce((max, row) => {
+    const match = row.code.match(/^HM-(\d+)$/i);
+    const value = match ? Number(match[1]) : 0;
+    return Number.isFinite(value) ? Math.max(max, value) : max;
+  }, 0) + 1;
+
+  return formatHmCode(nextSequence);
+}
+
+async function ensureUniqueSlug(baseInput: string, excludeId?: string): Promise<string> {
+  const supabase = createAdminClient();
+  const baseSlug = normalizePropertySlug(baseInput) || "property";
+  let attempt = 0;
+
+  while (attempt < 100) {
+    const candidate = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
+    let query = supabase.from("properties").select("id").eq("slug", candidate).limit(1);
+
+    if (excludeId) {
+      query = query.neq("id", excludeId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      return candidate;
+    }
+
+    attempt += 1;
+  }
+
+  throw new Error("ไม่สามารถสร้าง slug ที่ไม่ซ้ำได้");
+}
+
 export async function createAdminProperty(input: PropertyAdminInput): Promise<Property> {
   const supabase = createAdminClient();
+  const normalizedTitle = input.title.trim();
+  const nextCode = input.code.trim() || (await getNextPropertyCode());
+  const nextSlug = await ensureUniqueSlug(input.slug.trim() || normalizedTitle);
+  const payload = mapAdminInputToInsert({
+    ...input,
+    code: nextCode,
+    slug: nextSlug,
+    title: normalizedTitle,
+  });
+
   const { data, error } = await supabase
     .from("properties")
-    .insert(mapAdminInputToInsert(input))
+    .insert(payload)
     .select(PROPERTY_SELECT)
     .single();
 
@@ -135,9 +197,19 @@ export async function createAdminProperty(input: PropertyAdminInput): Promise<Pr
 
 export async function updateAdminProperty(id: string, input: PropertyAdminInput): Promise<Property> {
   const supabase = createAdminClient();
+  const normalizedTitle = input.title.trim();
+  const nextCode = input.code.trim();
+  const nextSlug = await ensureUniqueSlug(input.slug.trim() || normalizedTitle, id);
+  const payload = mapAdminInputToInsert({
+    ...input,
+    code: nextCode,
+    slug: nextSlug,
+    title: normalizedTitle,
+  });
+
   const { data, error } = await supabase
     .from("properties")
-    .update(mapAdminInputToInsert(input))
+    .update(payload)
     .eq("id", id)
     .select(PROPERTY_SELECT)
     .single();
