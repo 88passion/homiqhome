@@ -10,6 +10,7 @@ const FOOTER_LINKS = [
   { label: "เกี่ยวกับเรา", href: "/about" },
   { label: "ติดต่อ", href: "/contact" },
   { label: "FAQ", href: "/faq" },
+  { label: "นโยบายความเป็นส่วนตัว", href: "/privacy-policy" },
 ];
 
 export function Footer() {
