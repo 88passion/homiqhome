@@ -8,7 +8,7 @@ export async function getLatestProperties(limit = 4) {
   return supabase
     .from("properties")
     .select("*, property_images(*)")
-    .eq("status", "published")
+    .in("status", ["published", "sold", "rented"])
     .eq("is_latest", true)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -33,7 +33,7 @@ export async function getPublishedProperties({
   let query = supabase
     .from("properties")
     .select("*, property_images(*)")
-    .eq("status", "published")
+    .in("status", ["published", "sold", "rented"])
     .order("created_at", { ascending: false });
 
   if (purpose) query = query.eq("purpose", purpose);
@@ -52,7 +52,7 @@ export async function getPropertyBySlug(slug: string) {
     .from("properties")
     .select("*, property_images(*)")
     .eq("slug", slug)
-    .eq("status", "published")
+    .in("status", ["published", "sold", "rented"])
     .single();
 }
 
@@ -71,7 +71,7 @@ export async function getRelatedProperties({
   return supabase
     .from("properties")
     .select("*, property_images(*)")
-    .eq("status", "published")
+    .in("status", ["published", "sold", "rented"])
     .eq("purpose", purpose)
     .eq("province", province)
     .neq("id", propertyId)

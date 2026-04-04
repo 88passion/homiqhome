@@ -3,8 +3,14 @@ import { mapProperty } from "@/lib/supabase/mappers";
 import { getDistrictsByProvince, getAllThaiProvinces, sortProvincesByPriority } from "@/lib/constants/thaiLocations";
 import type { Property } from "@/types/property";
 
-function isAvailable(property: Property) {
-  return property.status !== "sold" && property.status !== "rented";
+function sortAvailableFirst(properties: Property[]) {
+  return [...properties].sort((a, b) => {
+    const aUnavailable = a.status === "sold" || a.status === "rented";
+    const bUnavailable = b.status === "sold" || b.status === "rented";
+
+    if (aUnavailable === bUnavailable) return 0;
+    return aUnavailable ? 1 : -1;
+  });
 }
 
 export async function getLatestPropertiesServer(limit = 4): Promise<Property[]> {
@@ -13,7 +19,7 @@ export async function getLatestPropertiesServer(limit = 4): Promise<Property[]> 
     if (error || !data) {
       return [];
     }
-    return data.map(mapProperty).filter(isAvailable).slice(0, limit);
+    return sortAvailableFirst(data.map(mapProperty)).slice(0, limit);
   } catch {
     return [];
   }
@@ -41,7 +47,7 @@ export async function getPublishedPropertiesServer(params: {
       return [];
     }
 
-    return data.map(mapProperty).filter(isAvailable);
+    return sortAvailableFirst(data.map(mapProperty));
   } catch {
     return [];
   }
@@ -72,7 +78,7 @@ export async function getRelatedPropertiesServer(property: Property, limit = 4):
       return [];
     }
 
-    return data.map(mapProperty).filter(isAvailable);
+    return sortAvailableFirst(data.map(mapProperty));
   } catch {
     return [];
   }
