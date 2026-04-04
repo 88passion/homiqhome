@@ -1,6 +1,6 @@
 import { getLatestProperties, getPropertyBySlug as getPropertyBySlugQuery, getPublishedProperties, getRelatedProperties as getRelatedPropertiesQuery } from "@/lib/queries/properties";
 import { mapProperty } from "@/lib/supabase/mappers";
-import { MOCK_PROPERTIES, filterProperties, getPropertyBySlug as getMockPropertyBySlug, getRelatedProperties as getMockRelatedProperties } from "@/lib/data/properties";
+import { getDistrictsByProvince, getAllThaiProvinces, sortProvincesByPriority } from "@/lib/constants/thaiLocations";
 import type { Property } from "@/types/property";
 
 function isAvailable(property: Property) {
@@ -10,12 +10,12 @@ function isAvailable(property: Property) {
 export async function getLatestPropertiesServer(limit = 4): Promise<Property[]> {
   try {
     const { data, error } = await getLatestProperties(limit);
-    if (error || !data || data.length === 0) {
-      return MOCK_PROPERTIES.filter((p) => p.isLatest && isAvailable(p)).slice(0, limit);
+    if (error || !data) {
+      return [];
     }
     return data.map(mapProperty).filter(isAvailable).slice(0, limit);
   } catch {
-    return MOCK_PROPERTIES.filter((p) => p.isLatest && isAvailable(p)).slice(0, limit);
+    return [];
   }
 }
 
@@ -37,25 +37,13 @@ export async function getPublishedPropertiesServer(params: {
       maxPrice: params.maxPrice,
     });
 
-    if (error || !data || data.length === 0) {
-      return filterProperties(params.purpose, {
-        propertyType: params.propertyType,
-        province: params.province,
-        district: params.district,
-        bedrooms: params.bedrooms?.toString(),
-        maxPrice: params.maxPrice?.toString(),
-      });
+    if (error || !data) {
+      return [];
     }
 
     return data.map(mapProperty).filter(isAvailable);
   } catch {
-    return filterProperties(params.purpose, {
-      propertyType: params.propertyType,
-      province: params.province,
-      district: params.district,
-      bedrooms: params.bedrooms?.toString(),
-      maxPrice: params.maxPrice?.toString(),
-    });
+    return [];
   }
 }
 
@@ -63,11 +51,11 @@ export async function getPropertyBySlugServer(slug: string): Promise<Property | 
   try {
     const { data, error } = await getPropertyBySlugQuery(slug);
     if (error || !data) {
-      return getMockPropertyBySlug(slug);
+      return undefined;
     }
     return mapProperty(data);
   } catch {
-    return getMockPropertyBySlug(slug);
+    return undefined;
   }
 }
 
@@ -80,12 +68,46 @@ export async function getRelatedPropertiesServer(property: Property, limit = 4):
       limit,
     });
 
-    if (error || !data || data.length === 0) {
-      return getMockRelatedProperties(property.id, property.purpose, limit).filter(isAvailable);
+    if (error || !data) {
+      return [];
     }
 
     return data.map(mapProperty).filter(isAvailable);
   } catch {
-    return getMockRelatedProperties(property.id, property.purpose, limit).filter(isAvailable);
+    return [];
   }
+}
+
+export async function getPublishedPropertyProvincesServer(
+  purpose: "buy" | "rent"
+): Promise<string[]> {
+  const properties = await getPublishedPropertiesServer({ purpose });
+  const counts = new Map<string, number>();
+
+  properties.forEach((property) => {
+    counts.set(property.province, (counts.get(property.province) ?? 0) + 1);
+  });
+
+  const boostedByCount = Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "th"))
+    .map(([province]) => province);
+
+  return sortProvincesByPriority(getAllThaiProvinces(), boostedByCount);
+}
+
+export async function getPublishedPropertyDistrictsServer(
+  purpose: "buy" | "rent",
+  province?: string
+): Promise<string[]> {
+  if (!province) return [];
+
+  const properties = await getPublishedPropertiesServer({ purpose, province });
+  const propertyDistricts = Array.from(new Set(properties.map((property) => property.district))).sort((a, b) =>
+    a.localeCompare(b, "th")
+  );
+
+  const canonicalDistricts = getDistrictsByProvince(province);
+  const merged = Array.from(new Set([...propertyDistricts, ...canonicalDistricts]));
+
+  return merged.sort((a, b) => a.localeCompare(b, "th"));
 }

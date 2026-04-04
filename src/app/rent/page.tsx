@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ListingFilters } from "@/components/listings/ListingFilters";
 import { Pagination } from "@/components/listings/Pagination";
 import { PropertyCard } from "@/components/listings/PropertyCard";
-import { getUniqueDistricts, getUniqueProvinces, toListingCard } from "@/lib/data/properties";
-import { getPublishedPropertiesServer } from "@/lib/data/properties.server";
+import { toListingCard } from "@/lib/data/properties";
+import { getPublishedPropertiesServer, getPublishedPropertyDistrictsServer, getPublishedPropertyProvincesServer } from "@/lib/data/properties.server";
 
 const DEFAULT_PAGE_SIZE = 24;
 
@@ -54,8 +54,8 @@ export default async function RentPage({ searchParams }: PageProps) {
   const start = (currentPage - 1) * pageSize;
   const pageItems = filtered.slice(start, start + pageSize);
 
-  const provinces = getUniqueProvinces("rent");
-  const districts = getUniqueDistricts("rent", filters.province ? filters.province : undefined);
+  const provinces = await getPublishedPropertyProvincesServer("rent");
+  const districts = await getPublishedPropertyDistrictsServer("rent", filters.province ? filters.province : undefined);
 
   return (
     <main className="min-h-screen bg-white">
